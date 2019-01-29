@@ -66,6 +66,83 @@
 
   <script type="text/javascript">
     var map = L.map('map', {
+      
+      //marker clusterer
+var mc;
+var mcOptions = {gridSize: 20, maxZoom: 17};
+
+                    //global infowindow
+var infowindow = new google.maps.InfoWindow();
+
+//geocoder
+var geocoder = new google.maps.Geocoder(); 
+
+var address = new Array("1000 Market St, Philadelphia, PA","1000 Market St, Philadelphia, PA","1002 Market St, Philadelphia, PA","1004 Market St, Philadelphia, PA");
+var content = new Array("1","2","3","4");
+
+function createMarker(latlng,text) {
+
+    var marker = new google.maps.Marker({
+        position: latlng
+    });
+
+    ///get array of markers currently in cluster
+    var allMarkers = mc.getMarkers();
+
+    //check to see if any of the existing markers match the latlng of the new marker
+    if (allMarkers.length != 0) {
+        for (i=0; i < allMarkers.length; i++) {
+            var currentMarker = allMarkers[i];
+            var pos = currentMarker.getPosition();
+
+            if (latlng.equals(pos)) {
+                text = text + " & " + content[i];
+            }
+
+        }
+    }
+
+    google.maps.event.addListener(marker, 'click', function() {
+        infowindow.close();
+        infowindow.setContent(text);
+        infowindow.open(map,marker);
+    });
+
+    return marker;
+}
+
+function geocodeAddress(address,i) {
+
+    geocoder.geocode( {'address': address}, function(results, status) {
+
+        if (status == google.maps.GeocoderStatus.OK) {
+
+            var marker = createMarker(results[0].geometry.location,content[i]);
+            mc.addMarker(marker);
+
+        } else { 
+            alert("Geocode was not successful for the following reason: " + status); 
+        } 
+    });
+}
+
+function initialize(){
+
+    var options = { 
+        zoom: 13, 
+        center: new google.maps.LatLng(39.96225,-75.13222), 
+        mapTypeId: google.maps.MapTypeId.ROADMAP 
+    }; 
+
+    map = new google.maps.Map(document.getElementById('map'), options); 
+
+    //marker cluster
+    mc = new MarkerClusterer(map, [], mcOptions);
+
+    for (i=0; i<address.length; i++) { 
+        geocodeAddress(address[i],i);
+    }
+
       attributionControl: false,
       zoomControl: false,
       scrollWheelZoom: false
