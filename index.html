@@ -70,6 +70,60 @@
       zoomControl: false,
       scrollWheelZoom: false
     }).setView([41.76,-72.69], 11); // default center is overridden by Google Sheet options and points
+  var oms = new OverlappingMarkerSpiderfier(map);
+
+      
+
+      var bounds = new L.LatLngBounds();
+
+      for (var i = 0; i < window.mapData.length; i ++) {
+
+        var datum = window.mapData[i];
+
+        var loc = new L.LatLng(datum.lat, datum.lon);
+
+        bounds.extend(loc);
+
+        var marker = new L.Marker(loc, {icon: new darkIcon()});
+
+        marker.desc = datum.d;
+
+        map.addLayer(marker);
+
+        oms.addMarker(marker);
+
+      }
+
+      map.fitBounds(bounds);
+
+      
+
+      var popup = new L.Popup({closeButton: false, offset: new L.Point(0.5, -24)});
+
+      oms.addListener('click', function(marker) {
+
+        popup.setContent(marker.desc);
+
+        popup.setLatLng(marker.getLatLng());
+
+        map.openPopup(popup);
+
+      });
+
+      oms.addListener('spiderfy', function(markers) {
+
+        for (var i = 0, len = markers.length; i < len; i ++) markers[i].setIcon(new lightIcon());
+
+        map.closePopup();
+
+      });
+
+      oms.addListener('unspiderfy', function(markers) {
+
+        for (var i = 0, len = markers.length; i < len; i ++) markers[i].setIcon(new darkIcon());
+
+      });
+  
   </script>
 
   <script type="text/javascript" src="google-doc-url.js"></script>
